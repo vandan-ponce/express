@@ -1,0 +1,21 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: vandan-express
+  namespace: argocd
+spec:
+  project: default
+  destination:
+    namespace: express-app
+    server: 'https://kubernetes.default.svc'
+  source:
+    repoURL: 'https://github.com/vandan-ponce/express-app.git'
+    targetRevision: HEAD
+    path: dev
+  
+  syncPolicy:
+    syncOptions:
+      - CreateNamespace=true
+    automated:
+      selfHeal: true
+      prune: true
