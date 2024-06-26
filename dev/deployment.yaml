@@ -17,5 +17,6 @@ spec:
       containers:
       - name: express-app
         image: public.ecr.aws/z3s7x0s4/vandan-express-app:v1
+        imagePullPolicy: Always
         ports:
         - containerPort: 3000
