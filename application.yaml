@@ -9,7 +9,7 @@ spec:
     namespace: express-app
     server: 'https://kubernetes.default.svc'
   source:
-    repoURL: 'https://github.com/vandan-ponce/express-app.git'
+    repoURL: 'https://github.com/vandan-ponce/express.git'
     targetRevision: HEAD
     path: dev
   
