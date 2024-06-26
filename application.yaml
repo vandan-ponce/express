@@ -12,7 +12,6 @@ spec:
     repoURL: 'https://github.com/vandan-ponce/express.git'
     targetRevision: HEAD
     path: dev
-  
   syncPolicy:
     syncOptions:
       - CreateNamespace=true
