@@ -16,6 +16,6 @@ spec:
     spec:
       containers:
       - name: express-app
-        image: public.ecr.aws/z3s7x0s4/vandan-express-app@sha256:9b8d22f323fdd5b4d5b010566a2ae3d5acb964324bd9a8575af3e6104c172ec0
+        image: public.ecr.aws/z3s7x0s4/vandan-express-app:v1
         ports:
         - containerPort: 3000
