@@ -4,7 +4,7 @@ metadata:
   name: express-app
   namespace: express-app
 spec:
-  replicas: 5
+  replicas: 4
   selector:
     matchLabels:
       app: express-app
@@ -12,6 +12,7 @@ spec:
     metadata:
       labels:
         app: express-app
+        name: vandan
     spec:
       containers:
       - name: express-app
@@ -27,6 +28,8 @@ kind: Service
 metadata:
   name: express-app
   namespace: express-app
+  labels: 
+    lead: sy
 spec:
   selector:
     app: express-app
