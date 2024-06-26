@@ -4,7 +4,7 @@ metadata:
   name: express-app
   namespace: express-app
 spec:
-  replicas: 2
+  replicas: 5
   selector:
     matchLabels:
       app: express-app
@@ -15,7 +15,7 @@ spec:
     spec:
       containers:
       - name: express-app
-        image: public.ecr.aws/z3s7x0s4/vandan-express-app:v1
+        image: public.ecr.aws/z3s7x0s4/vandan-express-app:v2
         imagePullPolicy: Always
         ports:
         - containerPort: 3000
