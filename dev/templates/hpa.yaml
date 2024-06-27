@@ -1,0 +1,72 @@
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: update-hpa-cronjob
+  namespace: protectonce
+spec:
+  schedule: "*/10 * * * *"
+  jobTemplate:
+    spec:
+      template:
+        spec:
+          containers:
+          - name: update-hpa
+            image: bitnami/kubectl:latest
+            command: ["/bin/sh", "-c"]
+            args:
+              - |
+                cp /scripts/update-hpa.sh /tmp/update-hpa.sh
+                chmod +x /tmp/update-hpa.sh
+                /tmp/update-hpa.sh
+            volumeMounts:
+            - name: script
+              mountPath: /scripts
+          restartPolicy: OnFailure
+          volumes:
+          - name: script
+            configMap:
+              name: update-hpa-script
+      backoffLimit: 4
+
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: update-hpa-script
+  namespace: protectonce
+data:
+  update-hpa.sh: |
+    #!/bin/bash
+
+    # Update and install jq safely
+    apt-get update -o Acquire::CompressionTypes::Order::=gz
+    apt-get install -y jq
+
+    get_number_of_nodes() {
+      kubectl get nodes -o json | jq '.items | length'
+    }
+
+    get_current_max_replicas() {
+      kubectl get hpa protectonce-agentless-hpa -n protectonce -o jsonpath='{.spec.maxReplicas}'
+    }
+
+    update_hpa() {
+      local max_replicas=$1
+      local hpa_name="protectonce-agentless-hpa"
+      local namespace="protectonce"
+
+      kubectl get hpa $hpa_name -n $namespace -o json | jq ".spec.maxReplicas = $max_replicas" > /tmp/hpa.json
+      kubectl apply -f /tmp/hpa.json
+    }
+
+    num_nodes=$(get_number_of_nodes)
+    max_replicas=$((num_nodes / 2))
+    if [ $((num_nodes % 2)) -ne 0 ]; then
+      max_replicas=$((max_replicas + 1))
+    fi
+
+    current_max_replicas=$(get_current_max_replicas)
+    echo "Current maxReplicas: $current_max_replicas"
+    echo "Updating maxReplicas to: $max_replicas"
+
+    update_hpa $max_replicas

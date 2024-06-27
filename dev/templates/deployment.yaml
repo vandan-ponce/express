@@ -1,0 +1,366 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: healthcheck
+  namespace: protectonce-watcher
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: healthcheck
+  template:
+    metadata:
+      labels:
+        app: healthcheck
+    spec:
+      containers:
+        - name: healthcheck
+          image: public.ecr.aws/protectonce-agentless/app-health-check-protectonce:latest
+          imagePullPolicy: Always
+          env:
+            - name: PO_APP_NAME
+              valueFrom:
+                secretKeyRef:
+                  name: do-secret
+                  key: po-app-name
+            - name: PO_CLIENTID
+              valueFrom:
+                secretKeyRef:
+                  name: do-secret
+                  key: po-clientid
+            - name: PO_TOKEN
+              valueFrom:
+                secretKeyRef:
+                  name: do-secret
+                  key: po-token
+            - name: PO_ENDPOINT
+              valueFrom:
+                secretKeyRef:
+                  name: do-secret
+                  key: po-endpoint
+            - name: PROTECTONCE_LOG_LEVEL
+              value: "verbose"
+            - name: MY_POD_NAME
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.name
+            - name: PO_APP_TYPE
+              value: "agentless"
+            - name: PO_NODE_ID
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.uid
+            - name: PROTECTONCE_SCOPE
+              value: "agentless.kubernetes"
+            - name: STAGE
+              value: app
+      restartPolicy: Always
+
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: api-test-db-controller-deployment
+  namespace: protectonce
+spec:
+  selector:
+    matchLabels:
+      app: api-test-db-controller
+  template:
+    metadata:
+      labels:
+        app: api-test-db-controller
+    spec:
+      containers:
+        - name: api-test-db-controller-server
+          image: public.ecr.aws/protectonce-agentless/app-api-test-db-protectonce-agentless:latest
+          imagePullPolicy: Always
+          ports:
+            - containerPort: 3000
+          env:
+            - name: PO_APP_NAME
+              valueFrom:
+                secretKeyRef:
+                  name: po-secret
+                  key: po-app-name
+            - name: PO_CLIENTID
+              valueFrom:
+                secretKeyRef:
+                  name: po-secret
+                  key: po-clientid
+            - name: PO_TOKEN
+              valueFrom:
+                secretKeyRef:
+                  name: po-secret
+                  key: po-token
+            - name: PO_ENDPOINT
+              valueFrom:
+                secretKeyRef:
+                  name: po-secret
+                  key: po-endpoint
+            - name: PROTECTONCE_LOG_LEVEL
+              value: "verbose"
+            - name: MY_POD_NAME
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.name
+            - name: PO_APP_TYPE
+              value: "agentless"
+            - name: PO_NODE_ID
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.uid
+            - name: PROTECTONCE_SCOPE
+              value: "agentless.kubernetes"
+            - name: STAGE
+              value: app
+
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: api-testing-controller-deployment
+  namespace: protectonce
+spec:
+  selector:
+    matchLabels:
+      app: api-testing-controller
+  template:
+    metadata:
+      labels:
+        app: api-testing-controller
+    spec:
+      containers:
+        - name: api-testing-controller-server
+          image: public.ecr.aws/protectonce-agentless/app-api-testing-protectonce-agentless:latest
+          imagePullPolicy: Always
+          ports:
+            - containerPort: 4000
+          env:
+            - name: PO_APP_NAME
+              valueFrom:
+                secretKeyRef:
+                  name: po-secret
+                  key: po-app-name
+            - name: PO_CLIENTID
+              valueFrom:
+                secretKeyRef:
+                  name: po-secret
+                  key: po-clientid
+            - name: PO_TOKEN
+              valueFrom:
+                secretKeyRef:
+                  name: po-secret
+                  key: po-token
+            - name: PO_ENDPOINT
+              valueFrom:
+                secretKeyRef:
+                  name: po-secret
+                  key: po-endpoint
+            - name: PROTECTONCE_LOG_LEVEL
+              value: "verbose"
+            - name: MY_POD_NAME
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.name
+            - name: PO_APP_TYPE
+              value: "agentless"
+            - name: PO_NODE_ID
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.uid
+            - name: PROTECTONCE_SCOPE
+              value: "agentless.kubernetes"
+            - name: STAGE
+              value: app
+
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: mongo-protectonce
+  namespace: protectonce
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: mongo-protectonce
+  template:
+    metadata:
+      labels:
+        app: mongo-protectonce
+    spec:
+      containers:
+        - name: mongo
+          image: mongo:4.4
+          imagePullPolicy: Always
+          ports:
+            - containerPort: 27017
+      restartPolicy: Always
+
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: pii-web-svc
+  namespace: protectonce
+spec:
+  selector:
+    matchLabels:
+      app: pii-web-svc
+  template:
+    metadata:
+      labels:
+        app: pii-web-svc
+    spec:
+      priorityClassName: high-priority
+      containers:
+        - name: pii-web-svc
+          image: public.ecr.aws/protectonce-agentless/app-pii-protectonce-agentless:latest
+          imagePullPolicy: Always
+          ports:
+            - containerPort: 3000
+          resources:
+            limits:
+              cpu: "2"
+              memory: "3Gi"
+            requests:
+              cpu: "1500m"
+              memory: "1500Mi"
+
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: ssrf-deployment
+  namespace: protectonce
+spec:
+  selector:
+    matchLabels:
+      app: ssrf
+  template:
+    metadata:
+      labels:
+        app: ssrf
+    spec:
+      containers:
+        - name: ssrf-server
+          image: public.ecr.aws/protectonce-agentless/app-api-testing-ssrf-protectonce-agentless:latest
+          imagePullPolicy: Always
+          env:
+            - name: PO_APP_NAME
+              valueFrom:
+                secretKeyRef:
+                  name: po-secret
+                  key: po-app-name
+            - name: PO_CLIENTID
+              valueFrom:
+                secretKeyRef:
+                  name: po-secret
+                  key: po-clientid
+            - name: PO_TOKEN
+              valueFrom:
+                secretKeyRef:
+                  name: po-secret
+                  key: po-token
+            - name: PO_ENDPOINT
+              valueFrom:
+                secretKeyRef:
+                  name: po-secret
+                  key: po-endpoint
+            - name: PROTECTONCE_LOG_LEVEL
+              value: "verbose"
+            - name: MY_POD_NAME
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.name
+            - name: PO_APP_TYPE
+              value: "agentless"
+            - name: PO_NODE_ID
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.uid
+            - name: PROTECTONCE_SCOPE
+              value: "agentless.kubernetes"
+            - name: STAGE
+              value: app
+      initContainers:
+        - name: wait-for-api-testing-controller
+          image: ubuntu:latest
+          args:
+            - /bin/bash
+            - -c
+            - |
+              apt-get update && apt-get -qq -y install curl && set -x; while [[ "$(curl -s -X POST -d '{}' -H 'Content-Type: application/json' 'http://api-testing-controller:4000/' -o /dev/null -w '%{http_code}')" != "200" ]]; do
+                echo 'waiting for api testing controller'
+                sleep 15;
+              done
+
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: protectonce-agentless
+  namespace: protectonce
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: protectonce-agentless
+  template:
+    metadata:
+      labels:
+        app: protectonce-agentless
+    spec:
+      priorityClassName: high-priority
+      containers:
+        - name: protectonce-agentless
+          image: public.ecr.aws/protectonce-agentless/app-po-server-reciever-repository
+          imagePullPolicy: Always
+          ports:
+            - containerPort: 5000
+            - containerPort: 3000
+          resources:
+            limits:
+              cpu: 1
+              memory: 2Gi
+            requests:
+              cpu: 200m
+              memory: 400Mi
+          env:
+            - name: PO_APP_NAME
+              valueFrom:
+                secretKeyRef:
+                  name: po-secret
+                  key: po-app-name
+            - name: PO_CLIENTID
+              valueFrom:
+                secretKeyRef:
+                  name: po-secret
+                  key: po-clientid
+            - name: PO_TOKEN
+              valueFrom:
+                secretKeyRef:
+                  name: po-secret
+                  key: po-token
+            - name: PO_ENDPOINT
+              valueFrom:
+                secretKeyRef:
+                  name: po-secret
+                  key: po-endpoint
+            - name: PROTECTONCE_LOG_LEVEL
+              value: info
+            - name: MY_POD_NAME
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.name
+            - name: PO_APP_TYPE
+              value: agentless
+            - name: PO_NODE_ID
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.uid
+            - name: PROTECTONCE_SCOPE
+              value: agentless.kubernetes
+            - name: STAGE
+              value: app
