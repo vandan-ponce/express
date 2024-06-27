@@ -1,9 +1,4 @@
 apiVersion: v1
 kind: Namespace
 metadata:
-  name: protectonce
----
-apiVersion: v1
-kind: Namespace
-metadata:
   name: protectonce-watcher

@@ -1,12 +1,4 @@
-apiVersion: rbac.authorization.k8s.io/v1
-kind: Role
-metadata:
-  name: pod-reader
-  namespace: protectonce
-rules:
-- apiGroups: [""]
-  resources: ["*"]
-  verbs: ["get", "list", "watch"]
+
 ---
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRole
@@ -33,19 +25,7 @@ rules:
   resources: ["*"]
   verbs: ["*"]
 ---
-apiVersion: rbac.authorization.k8s.io/v1
-kind: RoleBinding
-metadata:
-  name: pod-reader-binding
-  namespace: protectonce
-roleRef:
-  apiGroup: rbac.authorization.k8s.io
-  kind: Role
-  name: pod-reader
-subjects:
-- kind: ServiceAccount
-  name: default
-  namespace: protectonce-watcher
+
 ---
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRoleBinding
