@@ -1,0 +1,68 @@
+apiVersion: apps/v1
+kind: DaemonSet
+metadata:
+  name: protectonce-ebpf
+  namespace: protectonce
+spec:
+  selector:
+    matchLabels:
+      name: protectonce-ebpf
+  template:
+    metadata:
+      labels:
+        name: protectonce-ebpf
+    spec:
+      priorityClassName: high-priority
+      containers:
+      - env:
+        - name: PO_APP_NAME
+          valueFrom:
+            secretKeyRef:
+              key: po-app-name
+              name: po-secret
+        - name: PO_CLIENTID
+          valueFrom:
+            secretKeyRef:
+              key: po-clientid
+              name: po-secret
+        - name: PO_TOKEN
+          valueFrom:
+            secretKeyRef:
+              key: po-token
+              name: po-secret
+        - name: PO_ENDPOINT
+          valueFrom:
+            secretKeyRef:
+              key: po-endpoint
+              name: po-secret
+        - name: PROTECTONCE_LOG_LEVEL
+          value: info
+        - name: MY_POD_NAME
+          valueFrom:
+            fieldRef:
+              fieldPath: metadata.name
+        - name: PO_APP_TYPE
+          value: agentless
+        - name: PO_NODE_ID
+          valueFrom:
+            fieldRef:
+              fieldPath: metadata.uid
+        - name: PROTECTONCE_SCOPE
+          value: agentless.kubernetes
+        - name: PO_INTERFACES_TO_MONITOR
+          value: ALL
+        - name: STAGE
+          value: app
+        image: public.ecr.aws/protectonce-agentless/app-ebpf-sidecar-protectonce-agentless
+        imagePullPolicy: Always
+        name: protectonce-ebpf
+        resources:
+          limits:
+            cpu: 1
+            memory: 2Gi
+          requests:
+            cpu: 200m
+            memory: 400Mi
+        securityContext:
+          privileged: true
+      hostNetwork: true
